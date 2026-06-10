@@ -1,0 +1,1748 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Home Expenses</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f3ee;
+      --panel: #fffdfa;
+      --ink: #1d2428;
+      --muted: #667077;
+      --line: #ded8cf;
+      --blue: #2c6fbb;
+      --green: #2d8b57;
+      --red: #bd4b4b;
+      --gold: #c88928;
+      --shadow: 0 12px 36px rgba(38, 31, 22, .11);
+      --radius: 8px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        linear-gradient(180deg, rgba(246, 243, 238, .72), rgba(246, 243, 238, .95)),
+        url("https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1800&q=80") center / cover fixed;
+    }
+
+    button, input, select {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .shell {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 28px 18px 34px;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 18px;
+      align-items: end;
+      min-height: 126px;
+      padding-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.2rem, 4.8vw, 4.6rem);
+      line-height: .95;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      max-width: 620px;
+      margin: 14px 0 0;
+      color: #3d474d;
+      font-size: 1rem;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .icon-btn,
+    .primary-btn,
+    .secondary-btn,
+    .danger-btn {
+      min-height: 40px;
+      border-radius: var(--radius);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 12px;
+      color: var(--ink);
+      background: rgba(255, 253, 250, .86);
+      border: 1px solid rgba(74, 79, 83, .18);
+      box-shadow: 0 1px 0 rgba(255, 255, 255, .55) inset;
+    }
+
+    .icon-btn {
+      width: 40px;
+      padding: 0;
+      position: relative;
+    }
+
+    .icon-btn svg,
+    .primary-btn svg,
+    .secondary-btn svg,
+    .danger-btn svg {
+      width: 18px;
+      height: 18px;
+      stroke-width: 2;
+    }
+
+    .tooltip {
+      position: absolute;
+      right: 0;
+      top: 46px;
+      z-index: 3;
+      min-width: 132px;
+      padding: 7px 9px;
+      border-radius: 6px;
+      background: #20282d;
+      color: #fff;
+      font-size: .78rem;
+      opacity: 0;
+      transform: translateY(-3px);
+      pointer-events: none;
+      transition: .16s ease;
+      white-space: nowrap;
+    }
+
+    .icon-btn:hover .tooltip {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .primary-btn {
+      background: var(--blue);
+      color: #fff;
+      border-color: var(--blue);
+    }
+
+    .danger-btn {
+      color: #fff;
+      background: var(--red);
+      border-color: var(--red);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(290px, 360px) 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .panel,
+    .card {
+      border: 1px solid rgba(78, 72, 64, .18);
+      border-radius: var(--radius);
+      background: rgba(255, 253, 250, .92);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+    }
+
+    .panel {
+      padding: 16px;
+    }
+
+    .panel-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 1rem;
+      letter-spacing: 0;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 11px;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: .78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    input, select {
+      width: 100%;
+      min-height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 0 10px;
+      color: var(--ink);
+      background: #fff;
+      outline: none;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(44, 111, 187, .14);
+    }
+
+    .wide {
+      grid-column: 1 / -1;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    .property-stack {
+      display: grid;
+      gap: 16px;
+    }
+
+    .property-meta {
+      margin: -6px 0 12px;
+      color: var(--muted);
+      font-size: .9rem;
+    }
+
+    .property-actions {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 8px;
+      align-items: end;
+    }
+
+    .manager-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .manager-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+      min-height: 36px;
+      padding: 8px 9px;
+      border: 1px solid rgba(98, 91, 81, .15);
+      border-radius: 7px;
+      background: rgba(255, 255, 255, .64);
+      font-size: .9rem;
+    }
+
+    .manager-row span {
+      overflow-wrap: anywhere;
+    }
+
+    .mini-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      color: #8d2d2d;
+      background: #f3dedb;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .card {
+      min-height: 104px;
+      padding: 14px;
+      box-shadow: 0 8px 24px rgba(38, 31, 22, .09);
+    }
+
+    .metric-label {
+      color: var(--muted);
+      font-size: .78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .metric-value {
+      margin-top: 10px;
+      font-size: clamp(1.35rem, 2.5vw, 2.05rem);
+      font-weight: 800;
+      line-height: 1;
+      overflow-wrap: anywhere;
+    }
+
+    .metric-note {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: .85rem;
+    }
+
+    .budget-wrap {
+      display: grid;
+      gap: 8px;
+    }
+
+    .progress {
+      height: 10px;
+      overflow: hidden;
+      border-radius: 99px;
+      background: #e8e1d7;
+    }
+
+    .progress span {
+      display: block;
+      width: 0%;
+      height: 100%;
+      background: var(--green);
+      transition: width .25s ease;
+    }
+
+    .content-band {
+      display: grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .chart {
+      height: 264px;
+      display: grid;
+      align-items: end;
+      gap: 8px;
+      grid-template-columns: repeat(6, 1fr);
+      padding-top: 10px;
+    }
+
+    .bar-item {
+      min-width: 0;
+      display: grid;
+      gap: 8px;
+      align-items: end;
+      height: 100%;
+    }
+
+    .bar {
+      min-height: 6px;
+      border-radius: 6px 6px 2px 2px;
+      background: var(--blue);
+    }
+
+    .bar-label {
+      color: var(--muted);
+      text-align: center;
+      font-size: .72rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .category-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .category-row {
+      display: grid;
+      grid-template-columns: minmax(92px, 1fr) 2fr auto;
+      gap: 10px;
+      align-items: center;
+      font-size: .9rem;
+    }
+
+    .category-track {
+      height: 9px;
+      border-radius: 99px;
+      background: #e9e2d8;
+      overflow: hidden;
+    }
+
+    .category-fill {
+      display: block;
+      height: 100%;
+      width: 0;
+      border-radius: inherit;
+      background: var(--gold);
+    }
+
+    .filters {
+      display: grid;
+      grid-template-columns: 1fr 1fr minmax(150px, 1.2fr);
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    th, td {
+      padding: 11px 9px;
+      border-bottom: 1px solid rgba(98, 91, 81, .15);
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: .75rem;
+      text-transform: uppercase;
+    }
+
+    td {
+      font-size: .92rem;
+      overflow-wrap: anywhere;
+    }
+
+    .amount {
+      font-weight: 800;
+      text-align: right;
+    }
+
+    .delete-row {
+      width: 32px;
+      height: 32px;
+      border-radius: 7px;
+      background: #f3dedb;
+      color: #8d2d2d;
+    }
+
+    .link-edit {
+      width: 100%;
+      padding: 0;
+      text-align: left;
+      color: var(--ink);
+      background: transparent;
+      overflow-wrap: anywhere;
+    }
+
+    .link-edit:hover {
+      color: var(--blue);
+    }
+
+    .empty {
+      padding: 24px 10px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    @media (max-width: 900px) {
+      header,
+      .grid,
+      .content-band {
+        grid-template-columns: 1fr;
+      }
+
+      .header-actions {
+        justify-content: flex-start;
+      }
+
+      .summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 620px) {
+      .shell {
+        padding: 20px 12px 26px;
+      }
+
+      .summary-grid,
+      .form-grid,
+      .filters {
+        grid-template-columns: 1fr;
+      }
+
+      .chart {
+        height: 210px;
+      }
+
+      th:nth-child(2),
+      td:nth-child(2) {
+        display: none;
+      }
+
+      th, td {
+        padding: 10px 6px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <div>
+        <h1>Home Expenses</h1>
+        <p class="subtitle">Track expenses for multiple properties, watch monthly budgets in rupiah, and export a clean copy when needed.</p>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" id="exportCsv" aria-label="Export CSV">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+          <span class="tooltip">Export CSV</span>
+        </button>
+        <button class="icon-btn" id="importBtn" aria-label="Import CSV">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg>
+          <span class="tooltip">Import CSV</span>
+        </button>
+        <button class="icon-btn" id="resetData" aria-label="Reset data">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v6h6"/></svg>
+          <span class="tooltip">Reset data</span>
+        </button>
+      </div>
+      <input class="file-input" type="file" accept=".csv,text/csv" id="csvFile">
+    </header>
+
+    <section class="grid">
+      <aside class="property-stack">
+        <section class="panel">
+          <div class="panel-title">
+            <h2>Property</h2>
+          </div>
+          <p class="property-meta" id="propertyMeta">Choose a property to view its expenses.</p>
+          <div class="form-grid">
+            <label class="wide">Active Property
+              <select id="propertySelect"></select>
+            </label>
+            <label class="wide">Property Name
+              <input type="text" id="propertyName" maxlength="60" placeholder="Rumah Utama, Apartemen A...">
+            </label>
+          </div>
+          <div class="property-actions">
+            <button class="primary-btn" type="button" id="saveProperty">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>
+              Save
+            </button>
+            <button class="secondary-btn" type="button" id="newProperty">New</button>
+            <button class="danger-btn" type="button" id="deleteProperty">Delete</button>
+          </div>
+          <div class="manager-list" id="propertyList"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-title">
+            <h2>Categories</h2>
+          </div>
+          <div class="form-actions">
+            <input type="text" id="newCategoryName" maxlength="40" placeholder="New category">
+            <button class="primary-btn" type="button" id="addCategory">Add</button>
+          </div>
+          <div class="manager-list" id="categoryManagerList"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-title">
+            <h2>Bank Accounts</h2>
+          </div>
+          <div class="form-grid">
+            <label class="wide">Account Name
+              <input type="text" id="newAccountName" maxlength="50" placeholder="BCA Main, Mandiri, Cash">
+            </label>
+            <label class="wide">Bank
+              <input type="text" id="newAccountBank" maxlength="40" placeholder="BCA, Mandiri, Cash">
+            </label>
+          </div>
+          <div class="form-actions">
+            <button class="primary-btn" type="button" id="addAccount">Add Account</button>
+          </div>
+          <div class="manager-list" id="accountManagerList"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-title">
+            <h2>Add Expense</h2>
+          </div>
+          <form id="expenseForm">
+            <div class="form-grid">
+              <label>Date
+                <input type="date" id="date" required>
+              </label>
+              <label>Amount
+                <input type="number" id="amount" min="100" step="1000" placeholder="50000" required>
+              </label>
+              <label class="wide">Description
+              <input type="text" id="description" maxlength="80" placeholder="Belanja, sewa, listrik..." required>
+              </label>
+              <label>Category
+                <select id="category"></select>
+              </label>
+              <label>Paid By Account
+                <select id="paidBy"></select>
+              </label>
+            </div>
+            <div class="form-actions">
+              <button class="primary-btn" type="submit">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+                Add
+              </button>
+              <button class="secondary-btn" type="button" id="clearForm">Clear</button>
+            </div>
+          </form>
+        </section>
+      </aside>
+
+      <section>
+        <div class="summary-grid">
+          <article class="card">
+            <div class="metric-label">This Month</div>
+            <div class="metric-value" id="monthTotal">Rp0</div>
+            <div class="metric-note" id="monthCount">0 expenses</div>
+          </article>
+          <article class="card">
+            <div class="metric-label">Daily Average</div>
+            <div class="metric-value" id="dailyAvg">Rp0</div>
+            <div class="metric-note">Based on this month</div>
+          </article>
+          <article class="card">
+            <div class="metric-label">Top Category</div>
+            <div class="metric-value" id="topCategory">None</div>
+            <div class="metric-note" id="topCategoryValue">Rp0</div>
+          </article>
+          <article class="card budget-wrap">
+            <div class="metric-label">Monthly Budget</div>
+            <input type="number" id="budget" min="0" step="100000" aria-label="Monthly budget">
+            <div class="progress"><span id="budgetBar"></span></div>
+            <div class="metric-note" id="budgetNote">Rp0 left</div>
+          </article>
+        </div>
+
+        <div class="content-band">
+          <article class="panel">
+            <div class="panel-title">
+              <h2>Recent Months</h2>
+            </div>
+            <div class="chart" id="monthChart"></div>
+          </article>
+          <article class="panel">
+            <div class="panel-title">
+              <h2>Categories</h2>
+            </div>
+            <div class="category-list" id="categoryList"></div>
+          </article>
+        </div>
+
+        <article class="panel">
+          <div class="panel-title">
+            <h2>Expense List</h2>
+          </div>
+          <div class="filters">
+            <label>Month
+              <input type="month" id="monthFilter">
+            </label>
+            <label>Category
+              <select id="categoryFilter"></select>
+            </label>
+            <label>Search
+              <input type="search" id="search" placeholder="Find an expense">
+            </label>
+          </div>
+          <div id="tableWrap"></div>
+        </article>
+      </section>
+    </section>
+  </main>
+
+  <script type="application/json" id="legacy-local-storage-script">
+    const STORAGE_KEY = "home-expenses-v1";
+    const BUDGET_KEY = "home-expenses-budget-v1";
+    const currency = new Intl.NumberFormat(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+    const colors = ["#2c6fbb", "#2d8b57", "#c88928", "#bd4b4b", "#6f5ea8", "#23837a", "#9b6040", "#4d6875"];
+
+    const today = new Date();
+    const currentMonth = monthValue(today);
+    const seedExpenses = [
+      { id: crypto.randomUUID(), date: `${currentMonth}-02`, amount: 185, description: "Weekly groceries", category: "Groceries", paidBy: "Card" },
+      { id: crypto.randomUUID(), date: `${currentMonth}-03`, amount: 1200, description: "Rent", category: "Rent", paidBy: "Household" },
+      { id: crypto.randomUUID(), date: `${currentMonth}-06`, amount: 92, description: "Electricity bill", category: "Utilities", paidBy: "Household" },
+      { id: crypto.randomUUID(), date: `${currentMonth}-08`, amount: 38, description: "Dinner", category: "Dining", paidBy: "Me" },
+      { id: crypto.randomUUID(), date: previousMonth(1) + "-21", amount: 165, description: "Groceries", category: "Groceries", paidBy: "Card" },
+      { id: crypto.randomUUID(), date: previousMonth(2) + "-19", amount: 78, description: "Internet bill", category: "Utilities", paidBy: "Household" }
+    ];
+
+    let expenses = loadExpenses();
+    let editingId = null;
+
+    const els = {
+      form: document.querySelector("#expenseForm"),
+      date: document.querySelector("#date"),
+      amount: document.querySelector("#amount"),
+      description: document.querySelector("#description"),
+      category: document.querySelector("#category"),
+      paidBy: document.querySelector("#paidBy"),
+      clearForm: document.querySelector("#clearForm"),
+      monthTotal: document.querySelector("#monthTotal"),
+      monthCount: document.querySelector("#monthCount"),
+      dailyAvg: document.querySelector("#dailyAvg"),
+      topCategory: document.querySelector("#topCategory"),
+      topCategoryValue: document.querySelector("#topCategoryValue"),
+      budget: document.querySelector("#budget"),
+      budgetBar: document.querySelector("#budgetBar"),
+      budgetNote: document.querySelector("#budgetNote"),
+      monthChart: document.querySelector("#monthChart"),
+      categoryList: document.querySelector("#categoryList"),
+      monthFilter: document.querySelector("#monthFilter"),
+      categoryFilter: document.querySelector("#categoryFilter"),
+      search: document.querySelector("#search"),
+      tableWrap: document.querySelector("#tableWrap"),
+      exportCsv: document.querySelector("#exportCsv"),
+      importBtn: document.querySelector("#importBtn"),
+      csvFile: document.querySelector("#csvFile"),
+      resetData: document.querySelector("#resetData")
+    };
+
+    els.date.value = dateValue(today);
+    els.monthFilter.value = currentMonth;
+    els.budget.value = localStorage.getItem(BUDGET_KEY) || "2600";
+
+    els.form.addEventListener("submit", event => {
+      event.preventDefault();
+      const entry = {
+        id: editingId || crypto.randomUUID(),
+        date: els.date.value,
+        amount: Number(els.amount.value),
+        description: els.description.value.trim(),
+        category: els.category.value,
+        paidBy: els.paidBy.value
+      };
+      expenses = editingId ? expenses.map(item => item.id === editingId ? entry : item) : [entry, ...expenses];
+      editingId = null;
+      els.form.querySelector(".primary-btn").lastChild.textContent = " Add";
+      save();
+      resetForm();
+      render();
+    });
+
+    els.clearForm.addEventListener("click", resetForm);
+    els.budget.addEventListener("input", () => {
+      localStorage.setItem(BUDGET_KEY, els.budget.value || "0");
+      render();
+    });
+    [els.monthFilter, els.categoryFilter, els.search].forEach(el => el.addEventListener("input", render));
+    els.exportCsv.addEventListener("click", exportCsv);
+    els.importBtn.addEventListener("click", () => els.csvFile.click());
+    els.csvFile.addEventListener("change", importCsv);
+    els.resetData.addEventListener("click", () => {
+      if (confirm("Reset the app to starter data?")) {
+        expenses = [...seedExpenses];
+        save();
+        render();
+      }
+    });
+
+    function loadExpenses() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return Array.isArray(saved) && saved.length ? saved : seedExpenses;
+      } catch {
+        return seedExpenses;
+      }
+    }
+
+    function save() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(expenses));
+    }
+
+    function previousMonth(offset) {
+      const date = new Date(today.getFullYear(), today.getMonth() - offset, 1);
+      return monthValue(date);
+    }
+
+    function monthValue(date) {
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      return `${date.getFullYear()}-${month}`;
+    }
+
+    function dateValue(date) {
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${date.getFullYear()}-${month}-${day}`;
+    }
+
+    function monthName(monthValue) {
+      const [year, month] = monthValue.split("-").map(Number);
+      return new Date(year, month - 1, 1).toLocaleDateString(undefined, { month: "short" });
+    }
+
+    function format(value) {
+      return currency.format(value || 0);
+    }
+
+    function filteredExpenses() {
+      const term = els.search.value.trim().toLowerCase();
+      return expenses
+        .filter(item => !els.monthFilter.value || item.date.startsWith(els.monthFilter.value))
+        .filter(item => els.categoryFilter.value === "All" || item.category === els.categoryFilter.value)
+        .filter(item => !term || [item.description, item.category, item.paidBy].some(value => value.toLowerCase().includes(term)))
+        .sort((a, b) => b.date.localeCompare(a.date));
+    }
+
+    function sum(items) {
+      return items.reduce((total, item) => total + Number(item.amount), 0);
+    }
+
+    function render() {
+      renderSummary();
+      renderMonths();
+      renderCategories();
+      renderTable();
+    }
+
+    function renderSummary() {
+      const monthItems = expenses.filter(item => item.date.startsWith(els.monthFilter.value || currentMonth));
+      const total = sum(monthItems);
+      const daysElapsed = els.monthFilter.value === currentMonth ? today.getDate() : new Date(Number(els.monthFilter.value.slice(0, 4)), Number(els.monthFilter.value.slice(5, 7)), 0).getDate();
+      const categoryTotals = totalsBy(monthItems, "category");
+      const top = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1])[0];
+      const budget = Number(els.budget.value || 0);
+      const percent = budget ? Math.min((total / budget) * 100, 100) : 0;
+
+      els.monthTotal.textContent = format(total);
+      els.monthCount.textContent = `${monthItems.length} expense${monthItems.length === 1 ? "" : "s"}`;
+      els.dailyAvg.textContent = format(total / Math.max(daysElapsed, 1));
+      els.topCategory.textContent = top ? top[0] : "None";
+      els.topCategoryValue.textContent = top ? format(top[1]) : format(0);
+      els.budgetBar.style.width = `${percent}%`;
+      els.budgetBar.style.background = total > budget && budget > 0 ? "var(--red)" : "var(--green)";
+      els.budgetNote.textContent = budget ? `${format(Math.abs(budget - total))} ${total > budget ? "over" : "left"}` : "No budget set";
+    }
+
+    function renderMonths() {
+      const months = Array.from({ length: 6 }, (_, index) => previousMonth(5 - index));
+      const totals = Object.fromEntries(months.map(month => [month, sum(expenses.filter(item => item.date.startsWith(month)))]));
+      const max = Math.max(...Object.values(totals), 1);
+      els.monthChart.innerHTML = months.map((month, index) => `
+        <div class="bar-item" title="${month}: ${format(totals[month])}">
+          <div class="bar" style="height:${Math.max((totals[month] / max) * 100, 4)}%; background:${colors[index % colors.length]}"></div>
+          <div class="bar-label">${monthName(month)}</div>
+        </div>
+      `).join("");
+    }
+
+    function totalsBy(items, key) {
+      return items.reduce((totals, item) => {
+        totals[item[key]] = (totals[item[key]] || 0) + Number(item.amount);
+        return totals;
+      }, {});
+    }
+
+    function renderCategories() {
+      const items = expenses.filter(item => !els.monthFilter.value || item.date.startsWith(els.monthFilter.value));
+      const totals = Object.entries(totalsBy(items, "category")).sort((a, b) => b[1] - a[1]);
+      const max = Math.max(...totals.map(([, value]) => value), 1);
+      els.categoryList.innerHTML = totals.length ? totals.map(([category, value], index) => `
+        <div class="category-row">
+          <strong>${category}</strong>
+          <div class="category-track"><span class="category-fill" style="width:${(value / max) * 100}%; background:${colors[index % colors.length]}"></span></div>
+          <span>${format(value)}</span>
+        </div>
+      `).join("") : `<div class="empty">No category spending for this month.</div>`;
+    }
+
+    function renderTable() {
+      const items = filteredExpenses();
+      if (!items.length) {
+        els.tableWrap.innerHTML = `<div class="empty">No expenses match the current view.</div>`;
+        return;
+      }
+      els.tableWrap.innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th style="width:112px">Date</th>
+              <th>Description</th>
+              <th style="width:120px">Category</th>
+              <th style="width:120px">Account</th>
+              <th style="width:110px; text-align:right">Amount</th>
+              <th style="width:42px"></th>
+            </tr>
+          </thead>
+          <tbody>
+            ${items.map(item => `
+              <tr>
+                <td>${item.date}</td>
+                <td><button class="link-edit" data-edit="${item.id}">${escapeHtml(item.description)}</button></td>
+                <td>${item.category}</td>
+                <td>${item.paidBy}</td>
+                <td class="amount">${format(item.amount)}</td>
+                <td><button class="delete-row" data-delete="${item.id}" aria-label="Delete ${escapeHtml(item.description)}">x</button></td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      `;
+      document.querySelectorAll("[data-delete]").forEach(button => {
+        button.addEventListener("click", () => {
+          expenses = expenses.filter(item => item.id !== button.dataset.delete);
+          save();
+          render();
+        });
+      });
+      document.querySelectorAll("[data-edit]").forEach(button => {
+        button.addEventListener("click", () => editExpense(button.dataset.edit));
+      });
+    }
+
+    function editExpense(id) {
+      const item = expenses.find(entry => entry.id === id);
+      if (!item) return;
+      editingId = id;
+      els.date.value = item.date;
+      els.amount.value = item.amount;
+      els.description.value = item.description;
+      els.category.value = item.category;
+      els.paidBy.value = item.paidBy;
+      els.form.querySelector(".primary-btn").lastChild.textContent = " Save";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function resetForm() {
+      editingId = null;
+      els.form.reset();
+      els.date.value = dateValue(today);
+      els.category.value = "Groceries";
+      els.paidBy.value = "Household";
+      els.form.querySelector(".primary-btn").lastChild.textContent = " Add";
+    }
+
+    function exportCsv() {
+      const rows = [["date", "amount", "description", "category", "paidBy"], ...expenses.map(item => [item.date, item.amount, item.description, item.category, item.paidBy])];
+      const csv = rows.map(row => row.map(value => `"${String(value).replaceAll('"', '""')}"`).join(",")).join("\n");
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "home-expenses.csv";
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function importCsv(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const rows = parseCsv(String(reader.result));
+        const [, ...data] = rows;
+        const imported = data
+          .filter(row => row.length >= 5 && row[0])
+          .map(row => ({ id: crypto.randomUUID(), date: row[0], amount: Number(row[1]), description: row[2], category: row[3], paidBy: row[4] }));
+        expenses = [...imported, ...expenses];
+        save();
+        render();
+      };
+      reader.readAsText(file);
+      event.target.value = "";
+    }
+
+    function parseCsv(text) {
+      const rows = [];
+      let row = [];
+      let field = "";
+      let quoted = false;
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        const next = text[i + 1];
+        if (char === '"' && quoted && next === '"') {
+          field += '"';
+          i++;
+        } else if (char === '"') {
+          quoted = !quoted;
+        } else if (char === "," && !quoted) {
+          row.push(field);
+          field = "";
+        } else if ((char === "\n" || char === "\r") && !quoted) {
+          if (field || row.length) rows.push([...row, field]);
+          row = [];
+          field = "";
+          if (char === "\r" && next === "\n") i++;
+        } else {
+          field += char;
+        }
+      }
+      if (field || row.length) rows.push([...row, field]);
+      return rows;
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      })[char]);
+    }
+
+    const style = document.createElement("style");
+    style.textContent = `
+      .link-edit {
+        width: 100%;
+        padding: 0;
+        text-align: left;
+        color: var(--ink);
+        background: transparent;
+        overflow-wrap: anywhere;
+      }
+      .link-edit:hover { color: var(--blue); }
+    `;
+    document.head.appendChild(style);
+
+    save();
+    render();
+  </script>
+  <script>
+    const DB_NAME = "home-expenses-idr-db";
+    const DB_VERSION = 2;
+    const ACTIVE_PROPERTY_KEY = "home-expenses-active-property-id";
+    const currency = new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 });
+    const colors = ["#2c6fbb", "#2d8b57", "#c88928", "#bd4b4b", "#6f5ea8", "#23837a", "#9b6040", "#4d6875"];
+
+    const today = new Date();
+    const currentMonth = monthValue(today);
+    const state = {
+      db: null,
+      properties: [],
+      categories: [],
+      accounts: [],
+      expenses: [],
+      activePropertyId: "",
+      editingId: null
+    };
+
+    const els = {
+      propertySelect: document.querySelector("#propertySelect"),
+      propertyName: document.querySelector("#propertyName"),
+      propertyMeta: document.querySelector("#propertyMeta"),
+      propertyList: document.querySelector("#propertyList"),
+      saveProperty: document.querySelector("#saveProperty"),
+      newProperty: document.querySelector("#newProperty"),
+      deleteProperty: document.querySelector("#deleteProperty"),
+      newCategoryName: document.querySelector("#newCategoryName"),
+      addCategory: document.querySelector("#addCategory"),
+      categoryManagerList: document.querySelector("#categoryManagerList"),
+      newAccountName: document.querySelector("#newAccountName"),
+      newAccountBank: document.querySelector("#newAccountBank"),
+      addAccount: document.querySelector("#addAccount"),
+      accountManagerList: document.querySelector("#accountManagerList"),
+      form: document.querySelector("#expenseForm"),
+      date: document.querySelector("#date"),
+      amount: document.querySelector("#amount"),
+      description: document.querySelector("#description"),
+      category: document.querySelector("#category"),
+      paidBy: document.querySelector("#paidBy"),
+      clearForm: document.querySelector("#clearForm"),
+      monthTotal: document.querySelector("#monthTotal"),
+      monthCount: document.querySelector("#monthCount"),
+      dailyAvg: document.querySelector("#dailyAvg"),
+      topCategory: document.querySelector("#topCategory"),
+      topCategoryValue: document.querySelector("#topCategoryValue"),
+      budget: document.querySelector("#budget"),
+      budgetBar: document.querySelector("#budgetBar"),
+      budgetNote: document.querySelector("#budgetNote"),
+      monthChart: document.querySelector("#monthChart"),
+      categoryList: document.querySelector("#categoryList"),
+      monthFilter: document.querySelector("#monthFilter"),
+      categoryFilter: document.querySelector("#categoryFilter"),
+      search: document.querySelector("#search"),
+      tableWrap: document.querySelector("#tableWrap"),
+      exportCsv: document.querySelector("#exportCsv"),
+      importBtn: document.querySelector("#importBtn"),
+      csvFile: document.querySelector("#csvFile"),
+      resetData: document.querySelector("#resetData")
+    };
+
+    init();
+
+    async function init() {
+      state.db = await openDatabase();
+      await seedIfEmpty();
+      await refreshData();
+      bindEvents();
+      resetForm();
+      render();
+    }
+
+    function bindEvents() {
+      els.propertySelect.addEventListener("change", async () => {
+        state.activePropertyId = els.propertySelect.value;
+        localStorage.setItem(ACTIVE_PROPERTY_KEY, state.activePropertyId);
+        state.editingId = null;
+        await refreshData();
+        resetForm();
+        render();
+      });
+
+      els.saveProperty.addEventListener("click", saveActiveProperty);
+      els.newProperty.addEventListener("click", async () => {
+        els.propertyName.value = "";
+        await createProperty();
+      });
+      els.deleteProperty.addEventListener("click", deleteActiveProperty);
+      els.addCategory.addEventListener("click", addCategory);
+      els.newCategoryName.addEventListener("keydown", event => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          addCategory();
+        }
+      });
+      els.addAccount.addEventListener("click", addAccount);
+      [els.newAccountName, els.newAccountBank].forEach(input => {
+        input.addEventListener("keydown", event => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            addAccount();
+          }
+        });
+      });
+      els.clearForm.addEventListener("click", resetForm);
+
+      els.form.addEventListener("submit", async event => {
+        event.preventDefault();
+        if (!state.activePropertyId) return;
+        const entry = {
+          id: state.editingId || crypto.randomUUID(),
+          propertyId: state.activePropertyId,
+          date: els.date.value,
+          amount: Number(els.amount.value),
+          description: els.description.value.trim(),
+          category: els.category.value,
+          paidBy: els.paidBy.value,
+          updatedAt: new Date().toISOString()
+        };
+        if (!state.editingId) entry.createdAt = entry.updatedAt;
+        await putRecord("expenses", entry);
+        await refreshData();
+        resetForm();
+        render();
+      });
+
+      els.budget.addEventListener("input", async () => {
+        const property = activeProperty();
+        if (!property) return;
+        property.budget = Number(els.budget.value || 0);
+        await putRecord("properties", property);
+        await refreshData();
+        render();
+      });
+
+      [els.monthFilter, els.categoryFilter, els.search].forEach(el => el.addEventListener("input", render));
+      els.exportCsv.addEventListener("click", exportCsv);
+      els.importBtn.addEventListener("click", () => els.csvFile.click());
+      els.csvFile.addEventListener("change", importCsv);
+      els.resetData.addEventListener("click", resetData);
+    }
+
+    function openDatabase() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        request.onupgradeneeded = () => {
+          const db = request.result;
+          if (!db.objectStoreNames.contains("properties")) {
+            db.createObjectStore("properties", { keyPath: "id" });
+          }
+          if (!db.objectStoreNames.contains("expenses")) {
+            const expenseStore = db.createObjectStore("expenses", { keyPath: "id" });
+            expenseStore.createIndex("propertyId", "propertyId", { unique: false });
+            expenseStore.createIndex("date", "date", { unique: false });
+          }
+          if (!db.objectStoreNames.contains("categories")) {
+            db.createObjectStore("categories", { keyPath: "id" });
+          }
+          if (!db.objectStoreNames.contains("accounts")) {
+            db.createObjectStore("accounts", { keyPath: "id" });
+          }
+        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    function dbStore(storeName, mode = "readonly") {
+      return state.db.transaction(storeName, mode).objectStore(storeName);
+    }
+
+    function getAllRecords(storeName) {
+      return new Promise((resolve, reject) => {
+        const request = dbStore(storeName).getAll();
+        request.onsuccess = () => resolve(request.result || []);
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    function putRecord(storeName, record) {
+      return new Promise((resolve, reject) => {
+        const request = dbStore(storeName, "readwrite").put(record);
+        request.onsuccess = () => resolve(record);
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    function deleteRecord(storeName, id) {
+      return new Promise((resolve, reject) => {
+        const request = dbStore(storeName, "readwrite").delete(id);
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    async function deleteExpensesForProperty(propertyId) {
+      const all = await getAllRecords("expenses");
+      await Promise.all(all.filter(item => item.propertyId === propertyId).map(item => deleteRecord("expenses", item.id)));
+    }
+
+    function clearStore(storeName) {
+      return new Promise((resolve, reject) => {
+        const request = dbStore(storeName, "readwrite").clear();
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    async function seedIfEmpty() {
+      const properties = await getAllRecords("properties");
+      await seedManagersIfEmpty();
+      if (properties.length) return;
+      const mainId = crypto.randomUUID();
+      const rentalId = crypto.randomUUID();
+      const seedProperties = [
+        { id: mainId, name: "Rumah Utama", budget: 8000000, createdAt: new Date().toISOString() },
+        { id: rentalId, name: "Kontrakan A", budget: 3500000, createdAt: new Date().toISOString() }
+      ];
+      const seedExpenses = [
+        { id: crypto.randomUUID(), propertyId: mainId, date: `${currentMonth}-02`, amount: 750000, description: "Belanja mingguan", category: "Groceries", paidBy: "BCA Main" },
+        { id: crypto.randomUUID(), propertyId: mainId, date: `${currentMonth}-03`, amount: 3200000, description: "Cicilan rumah", category: "Rent", paidBy: "BCA Main" },
+        { id: crypto.randomUUID(), propertyId: mainId, date: `${currentMonth}-06`, amount: 430000, description: "Listrik dan air", category: "Utilities", paidBy: "Mandiri" },
+        { id: crypto.randomUUID(), propertyId: mainId, date: `${currentMonth}-08`, amount: 185000, description: "Makan di luar", category: "Dining", paidBy: "Cash" },
+        { id: crypto.randomUUID(), propertyId: rentalId, date: `${currentMonth}-04`, amount: 275000, description: "Perbaikan kran", category: "Utilities", paidBy: "Cash" },
+        { id: crypto.randomUUID(), propertyId: rentalId, date: previousMonth(1) + "-18", amount: 650000, description: "Cat ulang kamar", category: "Other", paidBy: "Mandiri" }
+      ];
+      await Promise.all(seedProperties.map(property => putRecord("properties", property)));
+      await Promise.all(seedExpenses.map(expense => putRecord("expenses", expense)));
+      localStorage.setItem(ACTIVE_PROPERTY_KEY, mainId);
+    }
+
+    async function seedManagersIfEmpty() {
+      const categories = await getAllRecords("categories");
+      const accounts = await getAllRecords("accounts");
+      if (!categories.length) {
+        const names = ["Groceries", "Rent", "Utilities", "Transport", "Dining", "Health", "Shopping", "Maintenance", "Other"];
+        await Promise.all(names.map((name, index) => putRecord("categories", {
+          id: crypto.randomUUID(),
+          name,
+          sort: index,
+          createdAt: new Date().toISOString()
+        })));
+      }
+      if (!accounts.length) {
+        const defaults = [
+          { name: "BCA Main", bank: "BCA" },
+          { name: "Mandiri", bank: "Mandiri" },
+          { name: "Cash", bank: "Cash" }
+        ];
+        await Promise.all(defaults.map((account, index) => putRecord("accounts", {
+          id: crypto.randomUUID(),
+          name: account.name,
+          bank: account.bank,
+          sort: index,
+          createdAt: new Date().toISOString()
+        })));
+      }
+    }
+
+    async function refreshData() {
+      state.properties = (await getAllRecords("properties")).sort((a, b) => a.name.localeCompare(b.name));
+      state.categories = (await getAllRecords("categories")).sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0) || a.name.localeCompare(b.name));
+      state.accounts = (await getAllRecords("accounts")).sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0) || a.name.localeCompare(b.name));
+      const savedActive = localStorage.getItem(ACTIVE_PROPERTY_KEY);
+      state.activePropertyId = state.properties.some(property => property.id === savedActive)
+        ? savedActive
+        : state.properties[0]?.id || "";
+      if (state.activePropertyId) localStorage.setItem(ACTIVE_PROPERTY_KEY, state.activePropertyId);
+      state.expenses = (await getAllRecords("expenses")).filter(item => item.propertyId === state.activePropertyId);
+    }
+
+    function activeProperty() {
+      return state.properties.find(property => property.id === state.activePropertyId);
+    }
+
+    async function saveActiveProperty() {
+      const name = els.propertyName.value.trim();
+      if (!name) return;
+      const property = activeProperty();
+      if (!property) {
+        await createProperty();
+        return;
+      }
+      property.name = name;
+      property.budget = Number(els.budget.value || property.budget || 0);
+      property.updatedAt = new Date().toISOString();
+      await putRecord("properties", property);
+      await refreshData();
+      render();
+    }
+
+    async function createProperty() {
+      const name = els.propertyName.value.trim() || `Property ${state.properties.length + 1}`;
+      const property = {
+        id: crypto.randomUUID(),
+        name,
+        budget: 0,
+        createdAt: new Date().toISOString()
+      };
+      await putRecord("properties", property);
+      state.activePropertyId = property.id;
+      localStorage.setItem(ACTIVE_PROPERTY_KEY, property.id);
+      await refreshData();
+      resetForm();
+      render();
+    }
+
+    async function deleteActiveProperty() {
+      const property = activeProperty();
+      if (!property || state.properties.length < 2) {
+        alert("Keep at least one property in the app.");
+        return;
+      }
+      if (!confirm(`Delete ${property.name} and all of its expenses?`)) return;
+      await deleteExpensesForProperty(property.id);
+      await deleteRecord("properties", property.id);
+      localStorage.removeItem(ACTIVE_PROPERTY_KEY);
+      await refreshData();
+      resetForm();
+      render();
+    }
+
+    async function addCategory() {
+      const name = els.newCategoryName.value.trim();
+      if (!name) return;
+      if (state.categories.some(category => category.name.toLowerCase() === name.toLowerCase())) {
+        els.newCategoryName.value = "";
+        return;
+      }
+      await putRecord("categories", {
+        id: crypto.randomUUID(),
+        name,
+        sort: state.categories.length,
+        createdAt: new Date().toISOString()
+      });
+      els.newCategoryName.value = "";
+      await refreshData();
+      render();
+    }
+
+    async function deleteCategory(id) {
+      if (state.categories.length < 2) {
+        alert("Keep at least one category in the app.");
+        return;
+      }
+      await deleteRecord("categories", id);
+      await refreshData();
+      render();
+    }
+
+    async function addAccount() {
+      const name = els.newAccountName.value.trim();
+      const bank = els.newAccountBank.value.trim() || "Account";
+      if (!name) return;
+      if (state.accounts.some(account => account.name.toLowerCase() === name.toLowerCase())) {
+        els.newAccountName.value = "";
+        els.newAccountBank.value = "";
+        return;
+      }
+      await putRecord("accounts", {
+        id: crypto.randomUUID(),
+        name,
+        bank,
+        sort: state.accounts.length,
+        createdAt: new Date().toISOString()
+      });
+      els.newAccountName.value = "";
+      els.newAccountBank.value = "";
+      await refreshData();
+      render();
+    }
+
+    async function deleteAccount(id) {
+      if (state.accounts.length < 2) {
+        alert("Keep at least one account in the app.");
+        return;
+      }
+      await deleteRecord("accounts", id);
+      await refreshData();
+      render();
+    }
+
+    async function resetData() {
+      if (!confirm("Reset all properties and expenses to starter data?")) return;
+      await clearStore("expenses");
+      await clearStore("properties");
+      await clearStore("categories");
+      await clearStore("accounts");
+      localStorage.removeItem(ACTIVE_PROPERTY_KEY);
+      await seedIfEmpty();
+      await refreshData();
+      resetForm();
+      render();
+    }
+
+    function previousMonth(offset) {
+      const date = new Date(today.getFullYear(), today.getMonth() - offset, 1);
+      return monthValue(date);
+    }
+
+    function monthValue(date) {
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      return `${date.getFullYear()}-${month}`;
+    }
+
+    function dateValue(date) {
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${date.getFullYear()}-${month}-${day}`;
+    }
+
+    function monthName(value) {
+      const [year, month] = value.split("-").map(Number);
+      return new Date(year, month - 1, 1).toLocaleDateString("id-ID", { month: "short" });
+    }
+
+    function format(value) {
+      return currency.format(value || 0);
+    }
+
+    function filteredExpenses() {
+      const term = els.search.value.trim().toLowerCase();
+      return state.expenses
+        .filter(item => !els.monthFilter.value || item.date.startsWith(els.monthFilter.value))
+        .filter(item => els.categoryFilter.value === "All" || item.category === els.categoryFilter.value)
+        .filter(item => !term || [item.description, item.category, item.paidBy].some(value => String(value).toLowerCase().includes(term)))
+        .sort((a, b) => b.date.localeCompare(a.date));
+    }
+
+    function sum(items) {
+      return items.reduce((total, item) => total + Number(item.amount), 0);
+    }
+
+    function render() {
+      renderProperties();
+      renderManagers();
+      renderExpenseOptions();
+      renderSummary();
+      renderMonths();
+      renderCategories();
+      renderTable();
+    }
+
+    function renderProperties() {
+      const property = activeProperty();
+      els.propertySelect.innerHTML = state.properties.map(item => `<option value="${item.id}">${escapeHtml(item.name)}</option>`).join("");
+      els.propertySelect.value = state.activePropertyId;
+      els.propertyName.value = property?.name || "";
+      els.budget.value = property?.budget || 0;
+      els.propertyMeta.textContent = property
+        ? `${state.expenses.length} expense${state.expenses.length === 1 ? "" : "s"} stored for ${property.name}.`
+        : "Create a property to start tracking expenses.";
+      els.propertyList.innerHTML = state.properties.map(item => `
+        <div class="manager-row">
+          <span>${escapeHtml(item.name)}${item.id === state.activePropertyId ? " (active)" : ""}</span>
+          <button class="mini-btn" data-select-property="${item.id}" aria-label="Select ${escapeHtml(item.name)}">&gt;</button>
+        </div>
+      `).join("");
+      document.querySelectorAll("[data-select-property]").forEach(button => {
+        button.addEventListener("click", async () => {
+          state.activePropertyId = button.dataset.selectProperty;
+          localStorage.setItem(ACTIVE_PROPERTY_KEY, state.activePropertyId);
+          state.editingId = null;
+          await refreshData();
+          resetForm();
+          render();
+        });
+      });
+    }
+
+    function renderManagers() {
+      els.categoryManagerList.innerHTML = state.categories.map(category => `
+        <div class="manager-row">
+          <span>${escapeHtml(category.name)}</span>
+          <button class="mini-btn" data-delete-category="${category.id}" aria-label="Delete ${escapeHtml(category.name)}">x</button>
+        </div>
+      `).join("");
+      els.accountManagerList.innerHTML = state.accounts.map(account => `
+        <div class="manager-row">
+          <span>${escapeHtml(account.name)} - ${escapeHtml(account.bank)}</span>
+          <button class="mini-btn" data-delete-account="${account.id}" aria-label="Delete ${escapeHtml(account.name)}">x</button>
+        </div>
+      `).join("");
+      document.querySelectorAll("[data-delete-category]").forEach(button => {
+        button.addEventListener("click", () => deleteCategory(button.dataset.deleteCategory));
+      });
+      document.querySelectorAll("[data-delete-account]").forEach(button => {
+        button.addEventListener("click", () => deleteAccount(button.dataset.deleteAccount));
+      });
+    }
+
+    function renderExpenseOptions() {
+      const selectedCategory = els.category.value || state.categories[0]?.name || "";
+      const selectedFilter = els.categoryFilter.value || "All";
+      const selectedAccount = els.paidBy.value || state.accounts[0]?.name || "";
+      els.category.innerHTML = state.categories.map(category => `<option>${escapeHtml(category.name)}</option>`).join("");
+      els.categoryFilter.innerHTML = `<option value="All">All</option>${state.categories.map(category => `<option>${escapeHtml(category.name)}</option>`).join("")}`;
+      els.paidBy.innerHTML = state.accounts.map(account => `<option>${escapeHtml(account.name)}</option>`).join("");
+      if (state.categories.some(category => category.name === selectedCategory)) els.category.value = selectedCategory;
+      if (selectedFilter === "All" || state.categories.some(category => category.name === selectedFilter)) els.categoryFilter.value = selectedFilter;
+      if (state.accounts.some(account => account.name === selectedAccount)) els.paidBy.value = selectedAccount;
+    }
+
+    function renderSummary() {
+      const monthItems = state.expenses.filter(item => item.date.startsWith(els.monthFilter.value || currentMonth));
+      const total = sum(monthItems);
+      const daysElapsed = els.monthFilter.value === currentMonth ? today.getDate() : new Date(Number(els.monthFilter.value.slice(0, 4)), Number(els.monthFilter.value.slice(5, 7)), 0).getDate();
+      const categoryTotals = totalsBy(monthItems, "category");
+      const top = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1])[0];
+      const budget = Number(els.budget.value || 0);
+      const percent = budget ? Math.min((total / budget) * 100, 100) : 0;
+
+      els.monthTotal.textContent = format(total);
+      els.monthCount.textContent = `${monthItems.length} expense${monthItems.length === 1 ? "" : "s"}`;
+      els.dailyAvg.textContent = format(total / Math.max(daysElapsed, 1));
+      els.topCategory.textContent = top ? top[0] : "None";
+      els.topCategoryValue.textContent = top ? format(top[1]) : format(0);
+      els.budgetBar.style.width = `${percent}%`;
+      els.budgetBar.style.background = total > budget && budget > 0 ? "var(--red)" : "var(--green)";
+      els.budgetNote.textContent = budget ? `${format(Math.abs(budget - total))} ${total > budget ? "over" : "left"}` : "No budget set";
+    }
+
+    function renderMonths() {
+      const months = Array.from({ length: 6 }, (_, index) => previousMonth(5 - index));
+      const totals = Object.fromEntries(months.map(month => [month, sum(state.expenses.filter(item => item.date.startsWith(month)))]));
+      const max = Math.max(...Object.values(totals), 1);
+      els.monthChart.innerHTML = months.map((month, index) => `
+        <div class="bar-item" title="${month}: ${format(totals[month])}">
+          <div class="bar" style="height:${Math.max((totals[month] / max) * 100, 4)}%; background:${colors[index % colors.length]}"></div>
+          <div class="bar-label">${monthName(month)}</div>
+        </div>
+      `).join("");
+    }
+
+    function totalsBy(items, key) {
+      return items.reduce((totals, item) => {
+        totals[item[key]] = (totals[item[key]] || 0) + Number(item.amount);
+        return totals;
+      }, {});
+    }
+
+    function renderCategories() {
+      const items = state.expenses.filter(item => !els.monthFilter.value || item.date.startsWith(els.monthFilter.value));
+      const totals = Object.entries(totalsBy(items, "category")).sort((a, b) => b[1] - a[1]);
+      const max = Math.max(...totals.map(([, value]) => value), 1);
+      els.categoryList.innerHTML = totals.length ? totals.map(([category, value], index) => `
+        <div class="category-row">
+          <strong>${escapeHtml(category)}</strong>
+          <div class="category-track"><span class="category-fill" style="width:${(value / max) * 100}%; background:${colors[index % colors.length]}"></span></div>
+          <span>${format(value)}</span>
+        </div>
+      `).join("") : `<div class="empty">No category spending for this month.</div>`;
+    }
+
+    function renderTable() {
+      const items = filteredExpenses();
+      if (!items.length) {
+        els.tableWrap.innerHTML = `<div class="empty">No expenses match the current view.</div>`;
+        return;
+      }
+      els.tableWrap.innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th style="width:112px">Date</th>
+              <th>Description</th>
+              <th style="width:120px">Category</th>
+              <th style="width:110px">Paid By</th>
+              <th style="width:130px; text-align:right">Amount</th>
+              <th style="width:42px"></th>
+            </tr>
+          </thead>
+          <tbody>
+            ${items.map(item => `
+              <tr>
+                <td>${item.date}</td>
+                <td><button class="link-edit" data-edit="${item.id}">${escapeHtml(item.description)}</button></td>
+                <td>${escapeHtml(item.category)}</td>
+                <td>${escapeHtml(item.paidBy)}</td>
+                <td class="amount">${format(item.amount)}</td>
+                <td><button class="delete-row" data-delete="${item.id}" aria-label="Delete ${escapeHtml(item.description)}">x</button></td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      `;
+      document.querySelectorAll("[data-delete]").forEach(button => {
+        button.addEventListener("click", async () => {
+          await deleteRecord("expenses", button.dataset.delete);
+          await refreshData();
+          render();
+        });
+      });
+      document.querySelectorAll("[data-edit]").forEach(button => {
+        button.addEventListener("click", () => editExpense(button.dataset.edit));
+      });
+    }
+
+    function editExpense(id) {
+      const item = state.expenses.find(entry => entry.id === id);
+      if (!item) return;
+      state.editingId = id;
+      els.date.value = item.date;
+      els.amount.value = item.amount;
+      els.description.value = item.description;
+      els.category.value = item.category;
+      els.paidBy.value = item.paidBy;
+      els.form.querySelector(".primary-btn").lastChild.textContent = " Save";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function resetForm() {
+      state.editingId = null;
+      els.form.reset();
+      els.date.value = dateValue(today);
+      els.category.value = state.categories[0]?.name || "";
+      els.paidBy.value = state.accounts[0]?.name || "";
+      els.monthFilter.value ||= currentMonth;
+      els.form.querySelector(".primary-btn").lastChild.textContent = " Add";
+    }
+
+    function exportCsv() {
+      const property = activeProperty();
+      const rows = [["property", "date", "amount", "description", "category", "paidByAccount"], ...state.expenses.map(item => [property?.name || "", item.date, item.amount, item.description, item.category, item.paidBy])];
+      const csv = rows.map(row => row.map(value => `"${String(value).replaceAll('"', '""')}"`).join(",")).join("\n");
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${(property?.name || "property").replaceAll(" ", "-").toLowerCase()}-expenses-idr.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    async function importCsv(event) {
+      const file = event.target.files[0];
+      if (!file || !state.activePropertyId) return;
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const rows = parseCsv(String(reader.result));
+        const header = rows[0]?.map(value => value.trim().toLowerCase()) || [];
+        const data = rows.slice(1);
+        const hasPropertyColumn = header[0] === "property";
+        const imported = data
+          .filter(row => row.length >= (hasPropertyColumn ? 6 : 5) && row[hasPropertyColumn ? 1 : 0])
+          .map(row => {
+            const offset = hasPropertyColumn ? 1 : 0;
+            return {
+              id: crypto.randomUUID(),
+              propertyId: state.activePropertyId,
+              date: row[offset],
+              amount: Number(row[offset + 1]),
+              description: row[offset + 2],
+              category: row[offset + 3],
+              paidBy: row[offset + 4],
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            };
+          });
+        const newCategories = [...new Set(imported.map(item => item.category).filter(Boolean))]
+          .filter(name => !state.categories.some(category => category.name.toLowerCase() === name.toLowerCase()));
+        const newAccounts = [...new Set(imported.map(item => item.paidBy).filter(Boolean))]
+          .filter(name => !state.accounts.some(account => account.name.toLowerCase() === name.toLowerCase()));
+        await Promise.all(newCategories.map((name, index) => putRecord("categories", {
+          id: crypto.randomUUID(),
+          name,
+          sort: state.categories.length + index,
+          createdAt: new Date().toISOString()
+        })));
+        await Promise.all(newAccounts.map((name, index) => putRecord("accounts", {
+          id: crypto.randomUUID(),
+          name,
+          bank: "Imported",
+          sort: state.accounts.length + index,
+          createdAt: new Date().toISOString()
+        })));
+        await Promise.all(imported.map(item => putRecord("expenses", item)));
+        await refreshData();
+        render();
+      };
+      reader.readAsText(file);
+      event.target.value = "";
+    }
+
+    function parseCsv(text) {
+      const rows = [];
+      let row = [];
+      let field = "";
+      let quoted = false;
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        const next = text[i + 1];
+        if (char === '"' && quoted && next === '"') {
+          field += '"';
+          i++;
+        } else if (char === '"') {
+          quoted = !quoted;
+        } else if (char === "," && !quoted) {
+          row.push(field);
+          field = "";
+        } else if ((char === "\n" || char === "\r") && !quoted) {
+          if (field || row.length) rows.push([...row, field]);
+          row = [];
+          field = "";
+          if (char === "\r" && next === "\n") i++;
+        } else {
+          field += char;
+        }
+      }
+      if (field || row.length) rows.push([...row, field]);
+      return rows;
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      })[char]);
+    }
+  </script>
+</body>
+</html>
